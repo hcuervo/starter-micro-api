@@ -5,6 +5,7 @@ http.createServer(function (req, res) {
     res.end();
 }).listen(process.env.PORT || 3000);*/
 
+const http = require('http');
 const { createRuntime } = require('@node-red/runtime');
 
 async function startNodeRED() {
@@ -13,6 +14,21 @@ async function startNodeRED() {
   console.log('Node-RED started!');
 }
 
-startNodeRED().catch((err) => {
-  console.error('Failed to start Node-RED', err);
+const server = http.createServer(async (req, res) => {
+  if (req.url === '/admin') {
+    res.writeHead(302, {
+      'Location': 'http://localhost:1880',
+    });
+    res.end();
+  } else {
+    res.statusCode = 404;
+    res.end();
+  }
+});
+
+server.listen(80, 'localhost', () => {
+  console.log('Node-RED server is running on port 80!');
+  startNodeRED().catch((err) => {
+    console.error('Failed to start Node-RED', err);
+  });
 });
